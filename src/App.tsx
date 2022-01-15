@@ -6,8 +6,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import './App.css'
 
+import Button from './Button'
+
 function App(): JSX.Element {
   const mountRef = useRef(null)
+
+  let play = true
+  let stepForward = false
 
   useEffect(
     () => {
@@ -52,8 +57,11 @@ function App(): JSX.Element {
       }
 
       function animate(): void {
-        requestAnimationFrame(animate);
-        feedbackLoop();
+        requestAnimationFrame(animate)
+        if (play || stepForward) {
+          feedbackLoop();
+          stepForward = false
+        }
         controls.update();
         renderer.render(scene, camera);
       }
@@ -74,8 +82,28 @@ function App(): JSX.Element {
     [],
   )
 
+  function pause() {
+    play = !play
+  }
+
+  function step() {
+    stepForward = true
+  }
+
   return (
-    <div ref={mountRef} />
+    <div style={{ backgroundColor: 'black' }}>
+      <Button
+        onClick={pause}
+        label="▶"
+      />
+
+      <Button
+        onClick={step}
+        label=">>"
+      />
+
+      <div ref={mountRef} />
+    </div>
   )
 }
 
