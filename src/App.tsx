@@ -18,18 +18,40 @@ function App() {
       // @ts-ignore
       mountRef.current.appendChild(renderer.domElement);
 
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      const cube = new THREE.Mesh(geometry, material);
+      scene.add( new THREE.AmbientLight( 0x808080 ) );
+      const light = new THREE.DirectionalLight( 0xffffff, 1 );
+      light.position.set( 3, 3, 3 );
+      scene.add( light );
 
-      scene.add(cube);
+      var geometry = new THREE.PlaneGeometry(1, 1, 30, 30);
+      const material = new THREE.MeshLambertMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+      var plane = new THREE.Mesh( geometry, material );
+      scene.add(plane);
+
       camera.position.z = 5;
+
+      function feedbackLoop(): void {
+        const positionAttribute = plane.geometry.getAttribute( 'position' );
+
+        const vertex = new THREE.Vector3();
+
+        for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
+
+          vertex.fromBufferAttribute( positionAttribute, vertexIndex );
+
+          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, vertex.z += Math.random() / 100 * (Math.random() < 0.5 ? -1 : 1));
+
+        }
+
+        plane.rotation.y += 0.05;
+
+        plane.geometry.attributes.position.needsUpdate = true;
+        plane.geometry.computeVertexNormals();
+      }
 
       function animate(): void {
         requestAnimationFrame(animate);
-        cube.rotation.x += 0.1;
-        cube.rotation.y -= 0.05;
-        cube.rotation.z += 0.01;
+        feedbackLoop()
         renderer.render(scene, camera);
       }
 
