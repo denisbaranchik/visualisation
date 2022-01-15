@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 // @ts-ignore
 import * as THREE from 'three'
+// @ts-ignore
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import './App.css'
 
@@ -30,6 +32,8 @@ function App(): JSX.Element {
 
       camera.position.z = 5;
 
+      const controls = new OrbitControls( camera, renderer.domElement );
+
       function feedbackLoop(): void {
         const positionAttribute = plane.geometry.getAttribute( 'position' );
 
@@ -43,15 +47,14 @@ function App(): JSX.Element {
 
         }
 
-        plane.rotation.y += 0.05;
-
         plane.geometry.attributes.position.needsUpdate = true;
         plane.geometry.computeVertexNormals();
       }
 
       function animate(): void {
         requestAnimationFrame(animate);
-        feedbackLoop()
+        feedbackLoop();
+        controls.update();
         renderer.render(scene, camera);
       }
 
