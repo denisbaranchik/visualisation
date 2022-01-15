@@ -18,41 +18,41 @@ function App(): JSX.Element {
       // @ts-ignore
       mountRef.current.appendChild(renderer.domElement)
 
-      scene.add( new THREE.AmbientLight( 0x808080 ) );
-      const light = new THREE.DirectionalLight( 0xffffff, 1 );
-      light.position.set( 3, 3, 3 );
-      scene.add( light );
+      scene.add( new THREE.AmbientLight( 0x808080 ) )
+      const light = new THREE.DirectionalLight( 0xffffff, 1 )
+      light.position.set( 3, 3, 3 )
+      scene.add( light )
 
-      var geometry = new THREE.PlaneGeometry(1, 1, 30, 30);
-      const material = new THREE.MeshLambertMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
-      var plane = new THREE.Mesh( geometry, material );
-      scene.add(plane);
+      let geometry = new THREE.PlaneGeometry(1, 1, 30, 30)
+      const material = new THREE.MeshLambertMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
+      let plane = new THREE.Mesh( geometry, material )
+      scene.add(plane)
 
       camera.position.z = 5;
 
       function feedbackLoop(): void {
-        const positionAttribute = plane.geometry.getAttribute( 'position' );
+        const positionAttribute = plane.geometry.getAttribute( 'position' )
 
-        const vertex = new THREE.Vector3();
+        const vertex = new THREE.Vector3()
 
         for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
 
-          vertex.fromBufferAttribute( positionAttribute, vertexIndex );
+          vertex.fromBufferAttribute( positionAttribute, vertexIndex )
 
-          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, vertex.z += Math.random() / 100 * (Math.random() < 0.5 ? -1 : 1));
+          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, vertex.z += Math.random() / 100 * (Math.random() < 0.5 ? -1 : 1))
 
         }
 
-        plane.rotation.y += 0.05;
+        plane.rotation.y += 0.05
 
-        plane.geometry.attributes.position.needsUpdate = true;
-        plane.geometry.computeVertexNormals();
+        plane.geometry.attributes.position.needsUpdate = true
+        plane.geometry.computeVertexNormals()
       }
 
       function animate(): void {
-        requestAnimationFrame(animate);
+        requestAnimationFrame(animate)
         feedbackLoop()
-        renderer.render(scene, camera);
+        renderer.render(scene, camera)
       }
 
       animate()
