@@ -4,19 +4,19 @@ import * as THREE from 'three'
 
 import './App.css'
 
-function App() {
-  const mountRef = useRef(null);
+function App(): JSX.Element {
+  const mountRef = useRef(null)
 
   useEffect(
     () => {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const scene = new THREE.Scene()
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 
-      const renderer = new THREE.WebGLRenderer();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      const renderer = new THREE.WebGLRenderer()
+      renderer.setSize(window.innerWidth, window.innerHeight)
 
       // @ts-ignore
-      mountRef.current.appendChild(renderer.domElement);
+      mountRef.current.appendChild(renderer.domElement)
 
       scene.add( new THREE.AmbientLight( 0x808080 ) );
       const light = new THREE.DirectionalLight( 0xffffff, 1 );
@@ -57,16 +57,22 @@ function App() {
 
       animate()
 
+      function onWindowResize(): void {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+      }
+
+      window.addEventListener("resize", onWindowResize, false)
+
       // @ts-ignore
-      return () => mountRef.current.removeChild( renderer.domElement);
+      return () => mountRef.current.removeChild(renderer.domElement)
     },
-    []
+    [],
   )
 
   return (
-    <div ref={mountRef}>
-
-    </div>
+    <div ref={mountRef} />
   )
 }
 
