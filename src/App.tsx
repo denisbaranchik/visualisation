@@ -35,9 +35,9 @@ function App(): JSX.Element {
       let plane = new THREE.Mesh( geometry, material )
       scene.add(plane)
 
-      camera.position.z = 5;
+      camera.position.z = 5
 
-      const controls = new OrbitControls( camera, renderer.domElement );
+      const controls = new OrbitControls( camera, renderer.domElement )
 
       function feedbackLoop(): void {
         const positionAttribute = plane.geometry.getAttribute( 'position' )
@@ -52,18 +52,18 @@ function App(): JSX.Element {
 
         }
 
-        plane.geometry.attributes.position.needsUpdate = true;
-        plane.geometry.computeVertexNormals();
+        plane.geometry.attributes.position.needsUpdate = true
+        plane.geometry.computeVertexNormals()
       }
 
       function animate(): void {
         requestAnimationFrame(animate)
         if (play || stepForward) {
-          feedbackLoop();
+          feedbackLoop()
           stepForward = false
         }
-        controls.update();
-        renderer.render(scene, camera);
+        controls.update()
+        renderer.render(scene, camera)
       }
 
       animate()
