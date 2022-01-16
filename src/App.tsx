@@ -117,11 +117,14 @@ function App(): JSX.Element {
             // must be end of loop
             break
           }
-          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, matrix[i][j])
+
+          let d = (matrix[i][j] - vertex.z) / 30;
+
+          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, vertex.z + d)
 
           if (i === new_upper.x && j === new_upper.y) {
             vertex.fromBufferAttribute( upperPositionAttribute, vertexIndex )
-            upper_plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, (upper[i][j] * 7 + 5))
+            upper_plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, (upper[old_x][old_y] * 7 + 5))
           }
 
           // lower[i][j] = value
