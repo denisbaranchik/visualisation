@@ -3,13 +3,12 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 // @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import iter from './alg';
+import { iter, matrix_sum } from './alg';
 import SimplexNoise from 'simplex-noise'
 
 import './App.css'
 
 import Button from './Button'
-import { createModuleResolutionCache } from 'typescript';
 
 function App(): JSX.Element {
   const mountRef = useRef(null)
@@ -83,19 +82,31 @@ function App(): JSX.Element {
       const controls = new OrbitControls(camera, renderer.domElement)
 
       function feedbackLoop(): void {
-        // const positionAttribute = plane.geometry.getAttribute( 'position' )
+        const positionAttribute = plane.geometry.getAttribute('position')
 
-        // const vertex = new THREE.Vector3()
-        // const simplex = new SimplexNoise()
+        iter(Math.floor((Math.random()) * 150), Math.floor((Math.random()) * 150), lower, upper, delta, 3)
+        let matrix = matrix_sum(lower, delta)
 
-        // for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
+        const vertex = new THREE.Vector3()
 
-        //   vertex.fromBufferAttribute( positionAttribute, vertexIndex )
+        for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
 
+          vertex.fromBufferAttribute( positionAttribute, vertexIndex )
 
-        //   plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, simplex.noise2D(vertex.x, vertex.y))
+          if (i === X_SIZE) {
+            // must be end of loop
+            break
+          }
+          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, matrix[i][j])
+          // lower[i][j] = value
+          j--
+  
+          if (j === -1) {
+            j = Y_SIZE - 1
+            i++
+          }
 
-        // }
+        }
 
         plane.geometry.attributes.position.needsUpdate = true
         plane.geometry.computeVertexNormals()
@@ -121,9 +132,9 @@ function App(): JSX.Element {
 
       window.addEventListener("resize", onWindowResize, false)
 
-      {
-        iter(75, 75, lower, upper, delta, 10);
-      }
+      // {
+      //   iter(75, 75, lower, upper, delta, 10);
+      // }
       // @ts-ignore
       return () => mountRef.current.removeChild(renderer.domElement)
     },
