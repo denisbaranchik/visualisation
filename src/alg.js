@@ -59,7 +59,7 @@ function try_lower(i, j, delta, value, c) {
     const dimy = delta[0].length
 
     if (i === clamp(i, 0, dimx) && j === clamp(j, 0, dimy))
-        delta -= value * c
+        delta[i][j] -= value * c
 }
 
 function lowering(i, j, delta, value) {
@@ -117,13 +117,16 @@ export function iter(i, j, matrix, upper, delta, cnt) {
     const {
         diffx,
         diffy
-    } = compute_grad(i, j, matrix) // must be delta
+    } = compute_grad(i, j, delta) // must be delta
     console.log(`${diffx} ${diffy}`)
 
     const i_new = clamp(Math.round(i + lambda * diffx), 0, dimx)
     const j_new = clamp(Math.round(j + lambda * diffy), 0, dimy)
     console.log(`move ${i_new - i} ${j_new - j}`)
+    console.log(`count ${cnt}`)
 
     if (cnt !== 0)
-        iter(i_new, j_new, matrix, upper, delta, cnt - 1)
+        return iter(i_new, j_new, matrix, upper, delta, cnt - 1)
+    else
+        return { x: i_new, y: j_new }
 }

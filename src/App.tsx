@@ -13,7 +13,7 @@ import Button from './Button'
 function App(): JSX.Element {
   const mountRef = useRef(null)
 
-  let play = true
+  let play = false
   let stepForward = false
 
   useEffect(
@@ -45,6 +45,16 @@ function App(): JSX.Element {
       let lower = new Array(X_SIZE).fill(0).map((_) => new Array(Y_SIZE).fill(0))
       let delta = new Array(X_SIZE).fill(0).map((_) => new Array(Y_SIZE).fill(0))
       let upper = new Array(X_SIZE).fill(0).map((_) => new Array(Y_SIZE).fill(0.1))
+
+      let upper_geo = new THREE.PlaneGeometry(5, 5, X_SIZE, Y_SIZE)
+      let upper_plane = new THREE.Mesh(upper_geo, material)
+
+      for (let i = 0; i < X_SIZE; i++) {
+        for (let j = 0; j < Y_SIZE; j++) {
+          upper[i][j] = simplex.noise2D(i / 150. * 5., j / 150. * 5.) / 20.;
+        }
+      }
+
       console.log(lower)
       console.log(delta)
       console.log(upper)
@@ -64,18 +74,22 @@ function App(): JSX.Element {
           break
         }
         lower[i][j] = value
-        j--
+        upper_plane.geometry.attributes.position.setXYZ(vertexIndex, vertex.x, vertex.y, (upper[i][j] * 7 + 5))
 
+        j--
         if (j === -1) {
           j = Y_SIZE - 1
           i++
         }
 
+
         // console.log(lower)
       }
       plane.geometry.computeVertexNormals()
+      upper_plane.geometry.computeVertexNormals()
 
       scene.add(plane)
+      scene.add(upper_plane)
 
       camera.position.z = 7
 
@@ -83,11 +97,17 @@ function App(): JSX.Element {
 
       function feedbackLoop(): void {
         const positionAttribute = plane.geometry.getAttribute('position')
+        const upperPositionAttribute = upper_plane.geometry.getAttribute('position')
 
-        iter(Math.floor((Math.random()) * 150), Math.floor((Math.random()) * 150), lower, upper, delta, 3)
+        let old_x = Math.floor(Math.random() * 150)
+        let old_y = Math.floor(Math.random() * 150)
+        let new_upper = iter(old_x, old_y, lower, upper, delta, 10)
         let matrix = matrix_sum(lower, delta)
 
         const vertex = new THREE.Vector3()
+
+        let j = Y_SIZE - 1
+        let i = 0
 
         for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
 
@@ -98,6 +118,12 @@ function App(): JSX.Element {
             break
           }
           plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, matrix[i][j])
+
+          if (i === new_upper.x && j === new_upper.y) {
+            vertex.fromBufferAttribute( upperPositionAttribute, vertexIndex )
+            upper_plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, (upper[i][j] * 7 + 5))
+          }
+
           // lower[i][j] = value
           j--
   
@@ -109,7 +135,9 @@ function App(): JSX.Element {
         }
 
         plane.geometry.attributes.position.needsUpdate = true
+        upper_plane.geometry.attributes.position.needsUpdate = true
         plane.geometry.computeVertexNormals()
+        upper_plane.geometry.computeVertexNormals()
       }
 
       function animate(): void {
