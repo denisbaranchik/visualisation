@@ -3,10 +3,13 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 // @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import iter, { lower, upper } from './alg';
+import SimplexNoise from 'simplex-noise'
 
 import './App.css'
 
 import Button from './Button'
+import { createModuleResolutionCache } from 'typescript';
 
 function App(): JSX.Element {
   const mountRef = useRef(null)
@@ -25,32 +28,74 @@ function App(): JSX.Element {
       // @ts-ignore
       mountRef.current.appendChild(renderer.domElement)
 
-      scene.add( new THREE.AmbientLight( 0x808080 ) )
-      const light = new THREE.DirectionalLight( 0xffffff, 1 )
-      light.position.set( 3, 3, 3 )
-      scene.add( light )
+      scene.add(new THREE.AmbientLight(0x808080))
+      const light = new THREE.DirectionalLight(0xffffff, 1)
+      light.position.set(3, 3, 3)
+      scene.add(light)
 
-      let geometry = new THREE.PlaneGeometry(1, 1, 30, 30)
+      const Y_SIZE = 150;
+      const X_SIZE = 150;
+      let geometry = new THREE.PlaneGeometry(5, 5, X_SIZE, Y_SIZE)
       const material = new THREE.MeshLambertMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
-      let plane = new THREE.Mesh( geometry, material )
+      let plane = new THREE.Mesh(geometry, material)
+
+      const positionAttribute = plane.geometry.getAttribute('position')
+      const vertex = new THREE.Vector3()
+      const simplex = new SimplexNoise()
+
+      let lower = new Array(X_SIZE).fill(0).map((_) => new Array(Y_SIZE).fill(0))
+      let delta = new Array(X_SIZE).fill(0).map((_) => new Array(Y_SIZE).fill(0))
+      let upper = new Array(X_SIZE).fill(0).map((_) => new Array(Y_SIZE).fill(0.1))
+      console.log(lower)
+      console.log(delta)
+      console.log(upper)
+
+      let j = Y_SIZE - 1
+      let i = 0
+      for (let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex++) {
+
+        vertex.fromBufferAttribute(positionAttribute, vertexIndex)
+
+        const value = simplex.noise2D(vertex.x, vertex.y);
+        // console.log(`${vertex.x} ${vertex.y}`)
+        plane.geometry.attributes.position.setXYZ(vertexIndex, vertex.x, vertex.y, value)
+
+        if (i === X_SIZE) {
+          // must be end of loop
+          break
+        }
+        lower[i][j] = value
+        j--
+
+        if (j === -1) {
+          j = Y_SIZE - 1
+          i++
+        }
+
+        // console.log(lower)
+      }
+      plane.geometry.computeVertexNormals()
+
       scene.add(plane)
 
-      camera.position.z = 5
+      camera.position.z = 7
 
-      const controls = new OrbitControls( camera, renderer.domElement )
+      const controls = new OrbitControls(camera, renderer.domElement)
 
       function feedbackLoop(): void {
-        const positionAttribute = plane.geometry.getAttribute( 'position' )
+        // const positionAttribute = plane.geometry.getAttribute( 'position' )
 
-        const vertex = new THREE.Vector3()
+        // const vertex = new THREE.Vector3()
+        // const simplex = new SimplexNoise()
 
-        for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
+        // for ( let vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex ++ ) {
 
-          vertex.fromBufferAttribute( positionAttribute, vertexIndex )
+        //   vertex.fromBufferAttribute( positionAttribute, vertexIndex )
 
-          plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, vertex.z += Math.random() / 100 * (Math.random() < 0.5 ? -1 : 1))
 
-        }
+        //   plane.geometry.attributes.position.setXYZ( vertexIndex, vertex.x, vertex.y, simplex.noise2D(vertex.x, vertex.y))
+
+        // }
 
         plane.geometry.attributes.position.needsUpdate = true
         plane.geometry.computeVertexNormals()
@@ -76,6 +121,9 @@ function App(): JSX.Element {
 
       window.addEventListener("resize", onWindowResize, false)
 
+      {
+        iter(75, 75, lower, upper, delta, 10);
+      }
       // @ts-ignore
       return () => mountRef.current.removeChild(renderer.domElement)
     },
