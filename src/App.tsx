@@ -9,7 +9,6 @@ import SimplexNoise from 'simplex-noise'
 import './App.css'
 
 import Button from './Button'
-import { createModuleResolutionCache } from 'typescript';
 
 function App(): JSX.Element {
   const mountRef = useRef(null)
