@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 // @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import iter, { lower, upper } from './alg';
+import iter from './alg';
 import SimplexNoise from 'simplex-noise'
 
 import './App.css'
