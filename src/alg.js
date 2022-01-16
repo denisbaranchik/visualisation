@@ -1,8 +1,6 @@
 
 const h = 10 / 150 ; // distance between points /
 const lambda = 1
-// const xs = /* Math.round(Math.random() * dimx) */ 4
-// const ys = /* Math.round(Math.random() * dimy) */ 4
 
 function forward_difference(xi, xi1, h) {
     return (xi1 - xi) / h
@@ -25,6 +23,7 @@ function matrix_sum(a, b) {
             res[i][j] += b[i][j]
         }
     }
+    return res
 }
 
 function compute_grad(i, j, matrix) {
