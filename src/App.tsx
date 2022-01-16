@@ -91,7 +91,7 @@ function App(): JSX.Element {
   }
 
   return (
-    <div style={{ backgroundColor: 'black' }}>
+    <div className="container">
       <Button
         onClick={pause}
         label="▶"
